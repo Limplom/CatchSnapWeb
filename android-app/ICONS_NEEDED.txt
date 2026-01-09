@@ -1,0 +1,56 @@
+WICHTIG: App-Icons müssen noch hinzugefügt werden!
+
+Das Projekt ist vollständig, aber du musst noch die App-Icons erstellen, bevor du die APK bauen kannst.
+
+=== OPTION 1: Android Studio Image Asset Tool (Empfohlen) ===
+
+1. Öffne das Projekt in Android Studio
+2. Rechtsklick auf "app" Modul
+3. Wähle: New > Image Asset
+4. Konfiguriere das Launcher Icon:
+   - Path: Wähle ein Bild (512x512 PNG empfohlen)
+   - Trim: Ja (optional)
+   - Shape: Wähle die Form (Circle, Square, etc.)
+5. Klicke "Next" und dann "Finish"
+
+Android Studio generiert automatisch alle benötigten Icon-Größen.
+
+=== OPTION 2: Manuelle Icon-Erstellung ===
+
+Erstelle PNG-Dateien in folgenden Größen und platziere sie:
+
+app/src/main/res/mipmap-mdpi/
+  - ic_launcher.png (48x48)
+  - ic_launcher_round.png (48x48)
+
+app/src/main/res/mipmap-hdpi/
+  - ic_launcher.png (72x72)
+  - ic_launcher_round.png (72x72)
+
+app/src/main/res/mipmap-xhdpi/
+  - ic_launcher.png (96x96)
+  - ic_launcher_round.png (96x96)
+
+app/src/main/res/mipmap-xxhdpi/
+  - ic_launcher.png (144x144)
+  - ic_launcher_round.png (144x144)
+
+app/src/main/res/mipmap-xxxhdpi/
+  - ic_launcher.png (192x192)
+  - ic_launcher_round.png (192x192)
+
+=== OPTION 3: Online Icon Generator ===
+
+Verwende Tools wie:
+- https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html
+- https://easyappicon.com/
+- https://appicon.co/
+
+Lade dein Bild hoch und generiere alle Größen automatisch.
+
+=== TEMPORÄRE LÖSUNG: Standard Android Icons ===
+
+Falls du SOFORT bauen willst, kannst du vorübergehend die Standard-Icons von Android verwenden.
+Die App wird dann das Standard-Android-Icon haben.
+
+In diesem Fall kannst du die App bauen ohne Icons hinzuzufügen.
