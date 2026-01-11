@@ -1,2 +1,40 @@
+# Claude AI
 .claude/*
+
+# Demo Scripts
 demo_scripts/*
+
+# Python
+docs/*
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Traffic Logs (Output)
+traffic_logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Download Media
+Downloads/*
+
+# Tests
+android-app/*
+android-app/build.gradle.kts

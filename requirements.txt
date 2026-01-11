@@ -1,0 +1,25 @@
+# CatchSnapWeb v2.0 - Requirements
+
+# Core Dependencies
+playwright>=1.40.0
+
+# Async File I/O
+aiofiles>=23.0.0
+
+# Terminal UI & Progress
+rich>=13.0.0
+
+# Config File Support
+pyyaml>=6.0
+
+# Type Hints (für Python < 3.10)
+typing-extensions>=4.0.0
+
+# Optional: Image Metadata (für zukünftige Features)
+# Pillow>=10.0.0
+
+# Development Dependencies (optional)
+# mypy>=1.0.0
+# pylint>=2.17.0
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
