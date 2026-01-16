@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "CatchSnap",
+  "version": "1.0.0",
+  "description": "Snapchat Web Media Downloader - Automatically capture and save images and videos from Snapchat Web",
+  "author": "CatchSnap",
+
+  "permissions": [
+    "downloads",
+    "storage",
+    "activeTab"
+  ],
+
+  "host_permissions": [
+    "*://web.snapchat.com/*",
+    "*://snapchat.com/*",
+    "*://*.snapchat.com/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://web.snapchat.com/*", "*://snapchat.com/web/*", "*://*.snapchat.com/web/*"],
+      "js": [
+        "utils/hash.js",
+        "utils/storage.js",
+        "content/user-parser.js",
+        "content/image-capture.js",
+        "content/video-capture.js",
+        "content/media-detector.js",
+        "content/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

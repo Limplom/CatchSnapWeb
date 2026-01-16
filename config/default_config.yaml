@@ -13,11 +13,11 @@ browser:
 downloads:
   blob_download_enabled: true
   download_dir: Downloads    # Central download folder (relative to project directory or absolute path)
-  max_retries: 8             # More attempts for progressive JPEGs
-  retry_backoff_max: 15      # Longer maximum backoff (seconds)
-  retry_backoff_base: 2.0    # Base delay between retries
+  max_retries: 10             # More attempts for progressive JPEGs
+  retry_backoff_max: 8      # Longer maximum backoff (seconds)
+  retry_backoff_base: 0.0    # Base delay between retries
   chunk_size: 65536          # 64KB
-  parallel_downloads: 3
+  parallel_downloads: 10
   settle_time: 0.0           # Wait time BEFORE queue addition (DISABLED due to race condition)
   delays:
     video: 0.0               # Immediate download, retries handle progressive loading

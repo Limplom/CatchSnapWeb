@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatchSnap</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">📸</span>
+        <span class="logo-text">CatchSnap</span>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="enableToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </header>
+
+    <!-- Status -->
+    <div class="status" id="status">
+      <span class="status-dot active"></span>
+      <span class="status-text">Active on Snapchat Web</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-value" id="todayCount">0</span>
+        <span class="stat-label">Today</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="totalCount">0</span>
+        <span class="stat-label">Total</span>
+      </div>
+    </div>
+
+    <!-- Auto-Download Options -->
+    <div class="section">
+      <h3 class="section-title">Auto-Download</h3>
+      <label class="checkbox-label">
+        <input type="checkbox" id="autoImages">
+        <span>Images</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="autoVideos">
+        <span>Videos</span>
+      </label>
+      <p class="hint">Unchecked items show a manual download button</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="action-btn" id="openFolder">
+        <span>📁</span> Open Downloads
+      </button>
+      <button class="action-btn secondary" id="clearHistory">
+        <span>🗑️</span> Clear History
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>v1.0.0</span>
+      <span>•</span>
+      <a href="#" id="helpLink">Help</a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
