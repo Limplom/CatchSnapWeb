@@ -97,17 +97,23 @@ const CatchSnapMediaDetector = {
   isSnapContent(img) {
     const src = (img.src || '');
 
-    // Debug: Log all images being checked
-    console.log('[CatchSnap] Checking image:', {
+    // Debug: Log all images being checked with MORE detail
+    console.log('[CatchSnap DEBUG] Checking image:', {
       src: src.substring(0, 80),
       naturalWidth: img.naturalWidth,
       naturalHeight: img.naturalHeight,
-      complete: img.complete
+      complete: img.complete,
+      className: img.className,
+      parentClassName: img.parentElement?.className,
+      inViewport: img.getBoundingClientRect().width > 0
     });
 
     // Must be reasonably large (not icons/avatars)
     if (img.naturalWidth < 200 || img.naturalHeight < 200) {
-      console.log('[CatchSnap] Rejected: too small');
+      console.log('[CatchSnap DEBUG] ❌ Rejected: too small', {
+        width: img.naturalWidth,
+        height: img.naturalHeight
+      });
       return false;
     }
 
@@ -115,7 +121,11 @@ const CatchSnapMediaDetector = {
     const aspectRatio = img.naturalWidth / img.naturalHeight;
     // Allow portrait (0.4-0.8), square (0.8-1.2), and some landscape
     if (aspectRatio < 0.3 || aspectRatio > 2.5) {
-      console.log('[CatchSnap] Rejected: bad aspect ratio', aspectRatio);
+      console.log('[CatchSnap DEBUG] ❌ Rejected: bad aspect ratio', {
+        aspectRatio,
+        width: img.naturalWidth,
+        height: img.naturalHeight
+      });
       return false;
     }
 
@@ -130,24 +140,38 @@ const CatchSnapMediaDetector = {
 
     for (const pattern of skipPatterns) {
       if (srcLower.includes(pattern)) {
-        console.log('[CatchSnap] Rejected: matches skip pattern', pattern);
+        console.log('[CatchSnap DEBUG] ❌ Rejected: matches skip pattern', {
+          pattern,
+          src: src.substring(0, 100)
+        });
         return false;
       }
     }
 
     // Blob URLs are almost always actual snap content if they're large enough
     if (src.startsWith('blob:')) {
-      console.log('[CatchSnap] ACCEPTED: Large blob URL image (likely snap content)');
+      console.log('[CatchSnap DEBUG] ✅ ACCEPTED: Large blob URL image (likely snap content)', {
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+        src: src.substring(0, 80)
+      });
       return true;
     }
 
     // For non-blob URLs, must be in a snap viewer context
-    if (!this.isInSnapViewer(img)) {
-      console.log('[CatchSnap] Rejected: not in snap viewer context');
+    const inViewer = this.isInSnapViewer(img);
+    if (!inViewer) {
+      console.log('[CatchSnap DEBUG] ❌ Rejected: not in snap viewer context', {
+        src: src.substring(0, 100)
+      });
       return false;
     }
 
-    console.log('[CatchSnap] ACCEPTED as snap content!');
+    console.log('[CatchSnap DEBUG] ✅ ACCEPTED as snap content!', {
+      src: src.substring(0, 80),
+      width: img.naturalWidth,
+      height: img.naturalHeight
+    });
     return true;
   },
 

@@ -34,7 +34,8 @@ logs/
 
 # Download Media
 Downloads/*
-
 # Tests
 android-app/*
 android-app/build.gradle.kts
+extension/DEBUG_INSTRUCTIONS.md
+extension/RE-DOWNLOAD_FEATURE.md

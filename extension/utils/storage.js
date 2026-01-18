@@ -11,6 +11,7 @@ const CatchSnapStorage = {
     autoImages: true,
     autoVideos: true,
     showOverlay: true,
+    allowRedownload: false, // Allow re-downloading same media with suffix
     downloadedHashes: [],
     stats: {
       totalDownloads: 0,

@@ -10,6 +10,7 @@ const DEFAULT_SETTINGS = {
   autoImages: true,
   autoVideos: true,
   showOverlay: true,
+  allowRedownload: false,
   downloadedHashes: [],
   stats: {
     totalDownloads: 0,
@@ -20,15 +21,19 @@ const DEFAULT_SETTINGS = {
 
 // Initialize default settings on install
 chrome.runtime.onInstalled.addListener(async (details) => {
+  console.log('[CatchSnap DEBUG] 📦 Extension event:', details.reason);
+
   if (details.reason === 'install') {
     await chrome.storage.local.set(DEFAULT_SETTINGS);
-    console.log('[CatchSnap] Extension installed, defaults set');
+    console.log('[CatchSnap DEBUG] ✅ Extension installed, defaults set:', DEFAULT_SETTINGS);
+  } else if (details.reason === 'update') {
+    console.log('[CatchSnap DEBUG] 🔄 Extension updated');
   }
 });
 
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('[CatchSnap BG] Received message:', message.type);
+  console.log('[CatchSnap DEBUG] 📨 Background received message:', message.type, 'from tab', sender.tab?.id);
 
   if (message.type === 'download') {
     // Support both old format (message.data) and new format (message.dataUrl, message.filename)
@@ -177,4 +182,4 @@ chrome.downloads.onChanged.addListener((delta) => {
   }
 });
 
-console.log('[CatchSnap] Background service worker loaded');
+console.log('[CatchSnap DEBUG] 🚀 Background service worker loaded and ready');
