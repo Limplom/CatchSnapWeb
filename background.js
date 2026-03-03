@@ -6,9 +6,6 @@
 // Default settings
 const DEFAULT_SETTINGS = {
   enabled: true,
-  downloadMode: 'auto',
-  autoImages: true,
-  autoVideos: true,
   showOverlay: true,
   allowRedownload: false,
   downloadedHashes: [],

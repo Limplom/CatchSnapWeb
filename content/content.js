@@ -20,10 +20,8 @@
     isEnabled = settings.enabled;
     console.log('[CatchSnap DEBUG] ⚙️ Settings loaded:', {
       enabled: isEnabled,
-      autoImages: settings.autoImages,
-      autoVideos: settings.autoVideos,
       showOverlay: settings.showOverlay,
-      downloadMode: settings.downloadMode
+      allowRedownload: settings.allowRedownload
     });
   }
 
@@ -34,8 +32,6 @@
   async function handleImage(img) {
     console.log('[CatchSnap DEBUG] handleImage called', {
       isEnabled,
-      autoImages: settings.autoImages,
-      showOverlay: settings.showOverlay,
       imgSrc: img.src?.substring(0, 80)
     });
 
@@ -44,35 +40,8 @@
       return;
     }
 
-    // Check if auto-download is enabled for images
-    if (!settings.autoImages) {
-      console.log('[CatchSnap DEBUG] 🔘 Manual mode - calling addDownloadOverlay');
-      // Show manual download button
-      addDownloadOverlay(img, 'image');
-      return;
-    }
-
-    console.log('[CatchSnap DEBUG] ⬇️ Auto mode - downloading directly');
-    // Auto download
-    await downloadImage(img);
-  }
-
-  /**
-   * Handle detected video
-   * @param {HTMLVideoElement} video
-   */
-  async function handleVideo(video) {
-    if (!isEnabled) return;
-
-    // Check if auto-download is enabled for videos
-    if (!settings.autoVideos) {
-      // Show manual download button
-      addDownloadOverlay(video, 'video');
-      return;
-    }
-
-    // Auto download
-    await downloadVideo(video);
+    // Show download button
+    addDownloadOverlay(img, 'image');
   }
 
   /**
@@ -168,97 +137,6 @@
   }
 
   /**
-   * Download a video
-   * @param {HTMLVideoElement} video
-   * @param {boolean} allowRedownload - Allow re-downloading with suffix
-   */
-  async function downloadVideo(video, allowRedownload = false) {
-    try {
-      console.log('[CatchSnap] Starting video capture...');
-
-      const result = await window.CatchSnapVideoCapture.captureVideo(video);
-      if (!result) {
-        console.log('[CatchSnap] Video capture returned null');
-        return false;
-      }
-
-      console.log('[CatchSnap] Video captured:', {
-        hash: result.hash?.substring(0, 8),
-        size: result.blob?.size,
-        type: result.mimeType
-      });
-
-      // Check if already downloaded
-      const isDownloaded = await window.CatchSnapStorage.isDownloaded(result.hash);
-      if (isDownloaded && !allowRedownload) {
-        console.log('[CatchSnap] Video already downloaded (duplicate), re-download disabled');
-        return false;
-      }
-
-      // Get user info for folder structure - use the media element for accurate username
-      const user = window.CatchSnapUserParser.getUserForMedia(video);
-
-      // Determine file extension
-      const ext = window.CatchSnapVideoCapture.getExtension(result.mimeType);
-      let filename = `CatchSnap_${user.subfolder}_${result.hash.substring(0, 12)}.${ext}`;
-
-      // Add suffix for re-downloads
-      if (isDownloaded && allowRedownload) {
-        const downloadCount = await getDownloadCount(result.hash);
-        const baseName = `CatchSnap_${user.subfolder}_${result.hash.substring(0, 12)}`;
-        filename = `${baseName}_${downloadCount}.${ext}`;
-        console.log('[CatchSnap DEBUG] Re-download video with suffix:', filename);
-      }
-
-      // Convert blob to data URL for background script
-      const dataUrl = await blobToBase64(result.blob);
-      console.log('[CatchSnap] Video Data URL created, length:', dataUrl.length);
-
-      // Use chrome.downloads API via background script
-      try {
-        const response = await chrome.runtime.sendMessage({
-          type: 'download',
-          dataUrl: dataUrl,
-          filename: filename
-        });
-        console.log('[CatchSnap] Background response:', response);
-
-        if (!response || !response.success) {
-          throw new Error(response?.error || 'Download failed');
-        }
-      } catch (msgError) {
-        console.log('[CatchSnap] Background download failed, trying direct method:', msgError);
-
-        // Fallback: Direct download using anchor element
-        const url = URL.createObjectURL(result.blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }
-
-      // Mark as downloaded (only first time, not for re-downloads)
-      if (!isDownloaded) {
-        await window.CatchSnapStorage.markDownloaded(result.hash);
-      } else if (allowRedownload) {
-        await incrementDownloadCount(result.hash);
-      }
-      await window.CatchSnapStorage.incrementStats();
-
-      console.log(`[CatchSnap] Video downloaded: ${filename}`);
-      return true;
-
-    } catch (error) {
-      console.error('[CatchSnap] Video download error:', error);
-      return false;
-    }
-  }
-
-  /**
    * Get download count for a hash (for re-download suffix)
    * @param {string} hash
    * @returns {Promise<number>}
@@ -283,7 +161,7 @@
   /**
    * Add download overlay button to media element (for manual mode)
    * @param {HTMLElement} element
-   * @param {string} type - 'image' or 'video'
+   * @param {string} type - 'image'
    */
   async function addDownloadOverlay(element, type) {
     console.log('[CatchSnap DEBUG] addDownloadOverlay called', {
@@ -307,7 +185,8 @@
 
     console.log('[CatchSnap DEBUG] ✅ Adding download overlay to', type);
 
-    // Check if already downloaded (compute hash first)
+    // Check if already downloaded (compute hash first, only for images)
+    // Videos: pre-fetch blob in background to avoid expired blob URLs on click
     let isAlreadyDownloaded = false;
     let mediaHash = null;
     try {
@@ -317,14 +196,8 @@
           mediaHash = result.hash;
           isAlreadyDownloaded = await window.CatchSnapStorage.isDownloaded(mediaHash);
         }
-      } else if (type === 'video') {
-        const result = await window.CatchSnapVideoCapture.captureVideo(element);
-        if (result && result.hash) {
-          mediaHash = result.hash;
-          isAlreadyDownloaded = await window.CatchSnapStorage.isDownloaded(mediaHash);
-        }
       }
-      console.log('[CatchSnap DEBUG] Hash check:', { mediaHash: mediaHash?.substring(0, 12), isAlreadyDownloaded });
+      console.log('[CatchSnap DEBUG] Hash check:', { type, mediaHash: mediaHash?.substring(0, 12), isAlreadyDownloaded });
     } catch (e) {
       console.log('[CatchSnap DEBUG] Hash check failed:', e.message);
     }
@@ -430,12 +303,7 @@
       btn.style.background = '#ff9500';
 
       try {
-        let success = false;
-        if (type === 'image') {
-          success = await downloadImage(element, allowRedownload);
-        } else {
-          success = await downloadVideo(element, allowRedownload);
-        }
+        let success = await downloadImage(element, allowRedownload);
 
         if (success) {
           // Success state
@@ -519,7 +387,7 @@
   console.log('[CatchSnap DEBUG] 👁️ Starting media detector...');
   window.CatchSnapMediaDetector.init({
     onImageDetected: handleImage,
-    onVideoDetected: handleVideo
+    onVideoDetected: null
   });
 
   console.log('[CatchSnap DEBUG] ✅ CatchSnap initialized successfully!');

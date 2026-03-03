@@ -10,8 +10,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusText = document.querySelector('.status-text');
   const todayCount = document.getElementById('todayCount');
   const totalCount = document.getElementById('totalCount');
-  const autoImages = document.getElementById('autoImages');
-  const autoVideos = document.getElementById('autoVideos');
   const allowRedownload = document.getElementById('allowRedownload');
   const openFolderBtn = document.getElementById('openFolder');
   const clearHistoryBtn = document.getElementById('clearHistory');
@@ -21,8 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Use the SAME defaults as in storage.js to ensure consistency
     const settings = await chrome.storage.local.get({
       enabled: true,
-      autoImages: true,  // Changed from false to true to match storage.js defaults
-      autoVideos: true,  // Changed from false to true to match storage.js defaults
       showOverlay: true,
       allowRedownload: false,
       stats: { totalDownloads: 0, todayDownloads: 0 }
@@ -34,9 +30,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     enableToggle.checked = settings.enabled;
     updateStatus(settings.enabled);
 
-    // Update auto-download checkboxes
-    autoImages.checked = settings.autoImages;
-    autoVideos.checked = settings.autoVideos;
     allowRedownload.checked = settings.allowRedownload;
 
     // Update stats
@@ -116,17 +109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) {
       console.log('[CatchSnap DEBUG] Error notifying tabs about toggle:', e.message);
     }
-  });
-
-  // Auto-download checkbox handlers
-  autoImages.addEventListener('change', async () => {
-    console.log('[CatchSnap DEBUG] autoImages changed to:', autoImages.checked);
-    await saveSetting('autoImages', autoImages.checked);
-  });
-
-  autoVideos.addEventListener('change', async () => {
-    console.log('[CatchSnap DEBUG] autoVideos changed to:', autoVideos.checked);
-    await saveSetting('autoVideos', autoVideos.checked);
   });
 
   allowRedownload.addEventListener('change', async () => {

@@ -26,6 +26,9 @@ const CatchSnapMediaDetector = {
 
     console.log('[CatchSnap] Media detector initializing...');
 
+    // Scan existing media on the page
+    this.scanExistingMedia();
+
     // Start observing for new media
     this.startObserver();
 
@@ -176,44 +179,19 @@ const CatchSnapMediaDetector = {
   },
 
   /**
-   * Check if video is actual Snap content
-   * @param {HTMLVideoElement} video
-   * @returns {boolean}
+   * Scan all existing media elements on the page
    */
-  isSnapVideoContent(video) {
-    // Must have a source
-    const src = video.src || video.currentSrc;
+  scanExistingMedia() {
+    console.log('[CatchSnap] Scanning existing media on page...');
 
-    console.log('[CatchSnap] Checking video:', {
-      src: src ? src.substring(0, 80) : 'no src',
-      readyState: video.readyState,
-      duration: video.duration,
-      videoWidth: video.videoWidth,
-      videoHeight: video.videoHeight
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+      if (img.complete && this.isSnapContent(img)) {
+        this.queueElement(img, 'image');
+      }
     });
 
-    if (!src) {
-      console.log('[CatchSnap] Video rejected: no source');
-      return false;
-    }
-
-    // Must be blob URL (Snapchat uses blob URLs for video)
-    if (!src.startsWith('blob:')) {
-      console.log('[CatchSnap] Video rejected: not a blob URL');
-      return false;
-    }
-
-    // Skip very small videos (likely UI elements or loading spinners)
-    if (video.videoWidth > 0 && video.videoHeight > 0) {
-      if (video.videoWidth < 100 || video.videoHeight < 100) {
-        console.log('[CatchSnap] Video rejected: too small dimensions');
-        return false;
-      }
-    }
-
-    // For blob URLs, accept them - they're likely snap content
-    console.log('[CatchSnap] Video ACCEPTED as snap content!');
-    return true;
+    console.log('[CatchSnap] Existing media scan complete');
   },
 
   /**
@@ -244,11 +222,6 @@ const CatchSnapMediaDetector = {
                 this.queueElement(target, 'image');
               }
             }, 100);
-          } else if (target.tagName === 'VIDEO') {
-            if (this.isSnapVideoContent(target)) {
-              console.log('[CatchSnap] Snap video detected (src change)');
-              this.queueElement(target, 'video');
-            }
           }
         }
       }
@@ -276,11 +249,6 @@ const CatchSnapMediaDetector = {
           this.queueElement(node, 'image');
         }
       }, 200);
-    } else if (node.tagName === 'VIDEO') {
-      if (this.isSnapVideoContent(node)) {
-        console.log('[CatchSnap] Snap video detected');
-        this.queueElement(node, 'video');
-      }
     }
 
     // Check children
@@ -292,13 +260,6 @@ const CatchSnapMediaDetector = {
             this.queueElement(img, 'image');
           }
         }, 200);
-      });
-
-      const videos = node.querySelectorAll('video');
-      videos.forEach(video => {
-        if (this.isSnapVideoContent(video)) {
-          this.queueElement(video, 'video');
-        }
       });
     }
   },

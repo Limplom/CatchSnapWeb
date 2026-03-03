@@ -186,20 +186,26 @@ const CatchSnapUserParser = {
    * @returns {{uuid: string | null, username: string | null, subfolder: string}}
    */
   getUserForMedia(mediaElement) {
-    // First try to extract username from the snap viewer (most accurate)
+    // Extract username from the snap viewer header near the media element
     const usernameFromViewer = this.extractUsernameFromSnapViewer(mediaElement);
+    const uuid = this.extractUUID();
 
     if (usernameFromViewer) {
-      const uuid = this.extractUUID();
       return {
         uuid,
         username: usernameFromViewer,
-        subfolder: this.buildSubfolder(usernameFromViewer, null) // Use only username, no UUID
+        subfolder: this.buildSubfolder(usernameFromViewer, null)
       };
     }
 
-    // Fallback to current user method
-    return this.getCurrentUser();
+    // Don't fall back to chat header — it shows the wrong user when viewing
+    // someone else's snap while having a different chat open
+    console.log('[CatchSnap] Could not extract username from snap viewer, using unknown');
+    return {
+      uuid,
+      username: null,
+      subfolder: uuid ? `user_${uuid.substring(0, 8)}` : 'unknown'
+    };
   },
 
   /**

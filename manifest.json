@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "CatchSnap",
   "version": "1.0.0",
-  "description": "Snapchat Web Media Downloader - Automatically capture and save images and videos from Snapchat Web",
+  "description": "Snapchat Web Media Downloader - Capture and save images from Snapchat Web",
   "author": "CatchSnap",
 
   "permissions": [
@@ -29,7 +29,6 @@
         "utils/storage.js",
         "content/user-parser.js",
         "content/image-capture.js",
-        "content/video-capture.js",
         "content/media-detector.js",
         "content/content.js"
       ],

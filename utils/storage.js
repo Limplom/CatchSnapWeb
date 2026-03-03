@@ -7,9 +7,6 @@ const CatchSnapStorage = {
   // Default settings
   defaults: {
     enabled: true,
-    downloadMode: 'auto', // 'auto', 'manual', 'hybrid'
-    autoImages: true,
-    autoVideos: true,
     showOverlay: true,
     allowRedownload: false, // Allow re-downloading same media with suffix
     downloadedHashes: [],
