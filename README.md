@@ -1,17 +1,14 @@
 # CatchSnap Browser Extension
 
-A Chrome/Edge extension for downloading media from Snapchat Web.
+A Chrome/Edge extension for downloading images from Snapchat Web.
 
 ## Features
 
-- **Automatic Media Detection**: Detects images and videos on Snapchat Web
-- **Complete Downloads**: Uses Canvas API for images and Blob fetch for videos - no truncation
-- **User Organization**: Downloads are organized by username and UUID
-- **Deduplication**: SHA256 hash-based duplicate detection
-- **Three Download Modes**:
-  - **Auto**: Automatically downloads all detected media
-  - **Manual**: Shows download overlay buttons on media
-  - **Hybrid**: Customize auto/manual per media type
+- **Image Detection**: Automatically detects snap images on Snapchat Web
+- **Manual Download**: Download button overlay on detected images - click to save
+- **User Organization**: Downloads are organized into folders by username
+- **Deduplication**: SHA256 hash-based duplicate detection prevents re-downloading the same image
+- **Re-download Support**: Optional setting to allow re-downloading with incremental suffix
 
 ## Installation
 
@@ -20,26 +17,22 @@ A Chrome/Edge extension for downloading media from Snapchat Web.
 1. Open Chrome/Edge and go to `chrome://extensions` (or `edge://extensions`)
 2. Enable **Developer mode** (toggle in top right)
 3. Click **Load unpacked**
-4. Select the `extension` folder from this repository
+4. Select this repository folder
 5. The CatchSnap icon should appear in your toolbar
 
 ### First Time Setup
 
 1. Navigate to [web.snapchat.com](https://web.snapchat.com)
 2. Log in to your Snapchat account
-3. Click the CatchSnap icon in the toolbar
-4. Configure your preferred download mode
+3. Click the CatchSnap icon in the toolbar to view settings and stats
 
 ## Usage
 
-### Auto Mode (Default)
-Simply browse Snapchat Web - all images and videos you view will be automatically downloaded to your Downloads folder under `CatchSnap/{Username}/`.
+Browse Snapchat Web normally. When a snap image is detected, a **Download** button appears in the top-right corner of the image. Click it to save the image.
 
-### Manual Mode
-Hover over any image or video to see a download button. Click to download.
-
-### Hybrid Mode
-Choose which media types to auto-download and which require manual action.
+- **Red button** = not yet downloaded
+- **Green button** = already downloaded
+- If "Allow Re-download" is enabled in settings, you can download the same image again (saved with a numeric suffix)
 
 ## Download Location
 
@@ -47,21 +40,21 @@ Media is saved to:
 ```
 Downloads/
 └── CatchSnap/
-    └── {Username}_{UUID}/
-        ├── {hash}.jpg
-        ├── {hash}.mp4
-        └── ...
+    └── {Username}/
+        └── CatchSnap_{Username}_{hash}.jpg
 ```
+
+The username is extracted from the snap viewer header, ensuring images are saved to the correct user's folder even when a different chat is open.
 
 ## Technical Details
 
 ### How It Works
 
-1. **MutationObserver** detects new `<img>` and `<video>` elements with blob URLs
-2. **Canvas API** captures fully rendered images (solves progressive JPEG issues)
-3. **Blob Fetch** downloads complete video files
-4. **SHA256 hashing** prevents duplicate downloads
-5. **Chrome Downloads API** saves files with proper organization
+1. **MutationObserver** detects new `<img>` elements (including blob URLs)
+2. **Canvas API** captures fully rendered images
+3. **SHA256 hashing** prevents duplicate downloads
+4. **Chrome Downloads API** saves files with proper folder organization
+5. **DOM-based username extraction** from snap viewer header for accurate attribution
 
 ### Permissions
 
@@ -73,18 +66,16 @@ Downloads/
 ### Files
 
 ```
-extension/
 ├── manifest.json           # Extension manifest (V3)
 ├── background.js           # Service worker for downloads
 ├── content/
 │   ├── content.js          # Main entry point
-│   ├── media-detector.js   # MutationObserver logic
+│   ├── media-detector.js   # MutationObserver-based image detection
 │   ├── image-capture.js    # Canvas-based image capture
-│   ├── video-capture.js    # Video blob extraction
-│   └── user-parser.js      # Username/UUID extraction
+│   └── user-parser.js      # Username/UUID extraction from DOM
 ├── popup/
-│   ├── popup.html          # UI
-│   ├── popup.js            # UI logic
+│   ├── popup.html          # Settings & stats UI
+│   ├── popup.js            # Popup logic
 │   └── popup.css           # Styles
 ├── utils/
 │   ├── hash.js             # SHA256 hashing
@@ -95,19 +86,19 @@ extension/
 
 ## Troubleshooting
 
-### Extension not detecting media
-- Make sure you're on `web.snapchat.com` (not `snapchat.com`)
-- Check that the extension is enabled (green status dot)
+### Extension not detecting images
+- Make sure you're on `web.snapchat.com`
+- Check that the extension is enabled in the popup
 - Try refreshing the page
 
 ### Downloads not starting
 - Check Chrome's download settings
 - Ensure the Downloads folder is writable
-- Check browser console for errors
+- Check browser console for errors (filter by `[CatchSnap]`)
 
-### Duplicate downloads
-- The extension uses hash-based deduplication
-- Clear history in popup to reset deduplication
+### Wrong user folder
+- The extension extracts the username from the snap viewer header above the image
+- If extraction fails, images are saved under `unknown` or `user_{UUID}`
 
 ## Development
 
